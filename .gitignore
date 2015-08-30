@@ -1,0 +1,10 @@
+//temporary and metadata files
+Thumbs.db
+~*
+.~*
+
+//AVR studio state save
+*.atsuo
+
+//AVR studio output directories
+Debug

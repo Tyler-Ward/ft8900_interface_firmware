@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "FT8900 Interface", "FT8900 Interface.cproj", "{9425152F-40CE-45DF-AC74-617A41654A78}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9425152F-40CE-45DF-AC74-617A41654A78}.Debug|AVR.ActiveCfg = Debug|AVR
+		{9425152F-40CE-45DF-AC74-617A41654A78}.Debug|AVR.Build.0 = Debug|AVR
+		{9425152F-40CE-45DF-AC74-617A41654A78}.Release|AVR.ActiveCfg = Release|AVR
+		{9425152F-40CE-45DF-AC74-617A41654A78}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

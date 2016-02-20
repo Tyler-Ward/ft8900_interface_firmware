@@ -18,7 +18,9 @@
 #define UART_USB_PORT_DDR DDRE				//!< DDR register for USB serial interface
 
 #define UART_USB_TX_PIN PE1					//!< USART TX pin
-#define UART_UAB_RX_PIN PE0					//!< USART RX pin
+#define UART_USB_RX_PIN PE0					//!< USART RX pin
+
+#define UART_USB_DATA UDR0					//!< USART Data register
 
 /* HEAD INTERFACE **************************************************/
 
@@ -29,6 +31,8 @@
 #define UART_HEAD_TX_PIN PH1				//!< USART TX pin
 #define UART_HEAD_RX_PIN PH0				//!< USART RX pin
 
+#define UART_HEAD_DATA UDR2					//!< USART Data register
+
 /* BODY INTERFACE **************************************************/
 
 #define UART_BODY_PORT PORTD				//!< PORT register for body serial interface
@@ -37,6 +41,8 @@
 
 #define UART_BODY_TX_PIN PD3				//!< USART TX pin
 #define UART_BODY_RX_PIN PD2				//!< USART RX pin
+
+#define UART_BODY_DATA UDR1					//!< USART Data register
 
 /* POWER SWITCH ****************************************************/
 

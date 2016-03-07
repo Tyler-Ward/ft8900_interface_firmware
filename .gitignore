@@ -8,3 +8,7 @@ Thumbs.db
 
 //AVR studio output directories
 Debug
+
+//Doxygen
+html
+latex

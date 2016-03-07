@@ -1,3 +1,9 @@
+/*
+ * string_decoder.h
+ *
+ * Created: 06/03/2016
+ *  Author: Tyler
+ */ 
 
 #include <avr/io.h>
 #include <string.h>
@@ -10,11 +16,17 @@
 #include "body_codes.h"
 #include "character_map.h"
 
+/*! decodes a character from the LCD feed
+ *
+ * \param data The data from the body to the head unit
+ * \param letter the letter location to be decoded 
+ * \retval character ASCII character displayed on the screen
+ */
 char decode_char(char* data,const lcd_character* letter)
 {
 	charmap_t letter_map; 
 	
-	//simple check to see if it is a T character
+	//Populate the letter map from the LCD feed
 	letter_map.A = (data[letter->A.byte]&(1<<letter->A.bit))?1:0;
 	letter_map.B = (data[letter->B.byte]&(1<<letter->B.bit))?1:0;
 	letter_map.C = (data[letter->C.byte]&(1<<letter->C.bit))?1:0;
@@ -31,35 +43,38 @@ char decode_char(char* data,const lcd_character* letter)
 	
 	//print_segments(letter_map);
 	
-	int i=0;
+	int i=0;								//create itterable character
 	
-	for(i=0;i<CHARMAP_MAX_CHAR;i++)
+	for(i=0;i<CHARMAP_MAX_CHAR;i++)			//iterate through the character map
 	{
-		if(charmap[i].map==letter_map.map)
+		if(charmap[i].map==letter_map.map)	//if character map matches
 		{
-			break;
-		}
-		//while ((UCSR0A & (1 << UDRE0)) == 0);
-		//UART_USB_DATA=i+CHARMAP_OFFSET;
-		
+			break;							//exit for loop
+		}	
 	}
 	
-	if(i==CHARMAP_MAX_CHAR)
+	if(i==CHARMAP_MAX_CHAR)					//check if we reached the end of the charmap
 	{
 		//todo throw error
-		return '\0';
+		return '\0';						//return a null character
 	}
 	else
 	{
-		return (char)(i+CHARMAP_OFFSET);
+		return (char)(i+CHARMAP_OFFSET);	//return the character with the required offset
 	}
 	
 	
 	
 }
 
+/*! Prints the segments activated for a character to the USB uart
+ *
+ * \param display a charmap of the character
+ * \retval #SUCCESS
+ */
 int print_segments(charmap_t display)
 {
+	//todo use a better print function
 	if(display.A)
 	{
 			while ((UCSR0A & (1 << UDRE0)) == 0);
@@ -125,20 +140,29 @@ int print_segments(charmap_t display)
 		while ((UCSR0A & (1 << UDRE0)) == 0);
 		UART_USB_DATA='M';
 	}
+	
+	//print trailing slash
 	while ((UCSR0A & (1 << UDRE0)) == 0);
 	UART_USB_DATA='/';
-	return(SUCCESS);
+	return(SUCCESS);	//return success
 }
 
+/*! decodes a string from the LCD feed
+ *
+ * \param data The data from the body to the head unit
+ * \param string the lcd_string object for the location to be decoded 
+ * \param output location so save decoded string
+ * \retval #SUCCESS
+ */
 int decode_string(char* data,const lcd_string string,char* output)
 {
-	int i=0;
+	int i=0;						//create string iterator
 	
-	for(i=0;i<string.length;i++)
+	for(i=0;i<string.length;i++)	//for each character in string
 	{
-		output[i]=decode_char(data,string.characters[i]);
+		output[i]=decode_char(data,string.characters[i]);	//run the decoder
 	}
-	output[i]='\0';
+	output[i]='\0';					//add a null terminator to the string
 	
-	return SUCCESS;
+	return SUCCESS;					//return success
 }

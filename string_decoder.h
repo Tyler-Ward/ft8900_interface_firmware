@@ -1,4 +1,9 @@
-
+/*
+ * string_decoder.h
+ *
+ * Created: 06/03/2016
+ *  Author: Tyler
+ */ 
 
 #ifndef STRING_DECODER_H_
 #define STRING_DECODER_H_

@@ -157,11 +157,15 @@ int main(void)
 			{		
 				char datal[12];
 				char datar[12];
+				char datalm[12];
+				char datarm[12];
 				
 				decode_string(bodyarray,LEFT_NAME,datal);
 				decode_string(bodyarray,RIGHT_NAME,datar);
+				decode_string(bodyarray,LEFT_MEMORY,datalm);
+				decode_string(bodyarray,RIGHT_MEMORY,datarm);
 				
-				sprintf(str,"STR LEFT= %s RIGHT= %s\r\n",datal,datar);
+				sprintf(str,"STR LEFT= %s RIGHT= %s\r\nMEM LEFT= %s RIGHT= %s\r\n",datal,datar,datalm,datarm);
 				
 				i=0;
 				

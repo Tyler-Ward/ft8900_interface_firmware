@@ -7,6 +7,7 @@
 
 
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -16,11 +17,11 @@
 #include "error_codes.h"
 
 #include "error_buffer.h"
+#include "driver_usb_uart.h"
+#include "string_decoder.h"
 
 #include "head_codes.h"
 #include "body_codes.h"
-
-#include "string_decoder.h"
 
 unsigned int headPosition=0;
 char headarray[16];
@@ -65,29 +66,27 @@ int main(void)
 	
 	ErrorBufferInit();								//setup the error buffer
 	
+	DriverUSBUartInit();							//initilise the USB uart driver;
+	
+	sei();											//enable global interrupts
+	
 	char ReceivedByte;
-	
-	UCSR0A = (1 << U2X0);
-	UCSR0B = (1 << RXEN0) | (1 << TXEN0);			//enable USB USART
-	
-	UBRR0H = (USART_USB_BAUDRATE_PRESCALE >> 8);	//load baudrate upper bits
-	UBRR0L = (USART_USB_BAUDRATE_PRESCALE);			//load baudrate lower bits
-	
-	UART_USB_DATA = 'U';
 	
 	//HEAD INTERFACE
 	
+	UCSR2A = (1 << U2X0);
 	UCSR2B = (1 << RXEN2) | (1 << TXEN2);			//enable transmission and reception
 	
-	UBRR2H = 0x00;//(USART_FT8900_BAUDRATE_PRESCALE >> 8);	//load baudrate upper bits
-	UBRR2L = 51UL;//(USART_FT8900_BAUDRATE_PRESCALE);		//load baudrate lower bits
+	UBRR2H = (USART_FT8900_BAUDRATE_PRESCALE >> 8);	//load baudrate upper bits
+	UBRR2L = (USART_FT8900_BAUDRATE_PRESCALE);		//load baudrate lower bits
 	
 	//BODY INTERFACE
 	
+	UCSR1A = (1 << U2X0);
 	UCSR1B = (1 << RXEN1) | (1 << TXEN1);
 	
-	UBRR1H = 0x00;//(USART_FT8900_BAUDRATE_PRESCALE >> 8);	//load baudrate upper bits
-	UBRR1L = 51UL;//(USART_FT8900_BAUDRATE_PRESCALE);		//load baudrate lower bits
+	UBRR1H = (USART_FT8900_BAUDRATE_PRESCALE >> 8);	//load baudrate upper bits
+	UBRR1L = (USART_FT8900_BAUDRATE_PRESCALE);		//load baudrate lower bits
 	
     while(1)
     {
@@ -112,24 +111,21 @@ int main(void)
 			storeBodydata(ReceivedByte);
 		}
 		
-		//loopback USB
-		if ((UCSR0A & (1 << RXC0)) != 0)			// has a byte been received from the body
+		//check USB commands
+		if (uartRecieveBuffer.enter)			// has a byte been received from the body
 		{
-			ReceivedByte = UART_USB_DATA;						// Fetch the received byte value into the variable "ByteReceived"
+			DriverUSBUartPut("\r\n",2);
+			
+			ReceivedByte = uartRecieveBuffer.buffer[uartRecieveBuffer.marker];						// Fetch the received byte value into the variable "ByteReceived"
+			uartRecieveBuffer.enter=0;
+			uartRecieveBuffer.length=0;
 			
 			if(ReceivedByte=='v')
 			{
 
 				sprintf(str,"volume= %d %d\r\n",headarray[4],headarray[6]);
 				
-				i=0;
-			
-				while(str[i]!=0)
-				{
-					while ((UCSR0A & (1 << UDRE0)) == 0);		// Do nothing until UDR is ready for more data to be written to it
-					UART_USB_DATA = str[i];
-					i++;
-				}
+				DriverUSBUartPutString(str);
 			}
 
 			if(ReceivedByte=='c')
@@ -143,14 +139,7 @@ int main(void)
 				
 				sprintf(str,"CHR 6= %d, %d, %d, %d, %d, %d\r\n",data1,data2,data3,data4,data5,data6);
 				
-				i=0;
-				
-				while(str[i]!=0)
-				{
-					while ((UCSR0A & (1 << UDRE0)) == 0);		// Do nothing until UDR is ready for more data to be written to it
-					UART_USB_DATA = str[i];
-					i++;
-				}
+				DriverUSBUartPutString(str);
 			}
 		
 			if(ReceivedByte=='s')
@@ -167,14 +156,7 @@ int main(void)
 				
 				sprintf(str,"STR LEFT= %s RIGHT= %s\r\nMEM LEFT= %s RIGHT= %s\r\n",datal,datar,datalm,datarm);
 				
-				i=0;
-				
-				while(str[i]!=0)
-				{
-					while ((UCSR0A & (1 << UDRE0)) == 0);		// Do nothing until UDR is ready for more data to be written to it
-					UART_USB_DATA = str[i];
-					i++;
-				}
+				DriverUSBUartPutString(str);
 			}
 		}
 

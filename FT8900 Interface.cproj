@@ -136,6 +136,12 @@
     <Compile Include="character_map.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="driver_usb_uart.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="driver_usb_uart.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="error_buffer.c">
       <SubType>compile</SubType>
     </Compile>

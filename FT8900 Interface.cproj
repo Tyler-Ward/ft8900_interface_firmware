@@ -163,6 +163,12 @@
     <Compile Include="peripherals.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="stream_processor.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="stream_processor.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="string_decoder.c">
       <SubType>compile</SubType>
     </Compile>

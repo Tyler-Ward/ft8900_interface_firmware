@@ -27,7 +27,7 @@ uart_transmit_buffer_t uartTransmitBuffer;	//!< buffer for outgoing data
 int DriverUSBUartInit()
 {
 	UCSR0A = (1 << U2X0);							//set fast clock mode
-	UCSR0B = (1 << RXEN0) | (1 << TXEN0) | (1<<RXCIE0) | (1<<UDRIE0);			//enable USB USART with RX interrupts
+	UCSR0B = (1 << RXEN0) | (1 << TXEN0) | (1<<RXCIE0) | (1<<UDRIE0);			//enable USB USART with RX and TX interrupts
 		
 	UBRR0H = (USART_USB_BAUDRATE_PRESCALE >> 8);	//load baudrate upper bits
 	UBRR0L = (USART_USB_BAUDRATE_PRESCALE);			//load baudrate lower bits
@@ -61,6 +61,7 @@ int DriverUSBUartPut(char* text,uint8_t length)
 	uartTransmitBuffer.length+=length;	//increase length of string in store
 	
 	DriverUSBUartLoadCharacter();	//start transmission if required
+	UCSR0B |= (1<<UDRIE0);
 	
 	return(SUCCESS);	//load complete
 }
@@ -80,11 +81,18 @@ int DriverUSBUartPutString(char* text)
  */
 int DriverUSBUartLoadCharacter()
 {
-	if(uartTransmitBuffer.length>0 && (UCSR0A & (1 << UDRE0)))
+	if(uartTransmitBuffer.length>0)
 	{
-		UART_USB_DATA=uartTransmitBuffer.buffer[uartTransmitBuffer.marker];
-		uartTransmitBuffer.marker=(uartTransmitBuffer.marker+1)%UART_TRANSMIT_BUFFER_LENGTH;
-		uartTransmitBuffer.length--;
+		if(UCSR0A & (1 << UDRE0))
+		{
+			UART_USB_DATA=uartTransmitBuffer.buffer[uartTransmitBuffer.marker];
+			uartTransmitBuffer.marker=(uartTransmitBuffer.marker+1)%UART_TRANSMIT_BUFFER_LENGTH;
+			uartTransmitBuffer.length--;
+		}
+	}
+	else
+	{
+		UCSR0B &= ~(1<<UDRIE0);
 	}
 	return(SUCCESS);
 }
@@ -118,5 +126,5 @@ ISR(USART0_RX_vect)
  */
 ISR(USART0_UDRE_vect)
 {
-	DriverUSBUartLoadCharacter(); //trigger transmison of next byte
+	DriverUSBUartLoadCharacter(); //trigger transmission of next byte
 }

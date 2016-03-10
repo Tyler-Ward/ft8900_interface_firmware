@@ -20,6 +20,10 @@
 
 /* FT8900 UART *****************************************************/
 
+#define ERR_STREAM_BODY_STREAM_TOO_LONG 20		//!< body data message is too long
+#define ERR_STREAM_HEAD_STREAM_TOO_LONG 21		//!< head data message is too long
 
+#define ERR_STREAM_SEGMENT_BYTE_OUT_OF_RANGE 22	//!< byte of the LCD segment is out of range
+#define ERR_STREAM_SEGMENT_BIT_OUT_OF_RANGE 23	//!< bit of the LCD segment is out of range
 
 #endif /* ERROR_CODES_H_ */

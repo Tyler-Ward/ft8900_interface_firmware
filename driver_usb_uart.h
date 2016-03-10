@@ -15,18 +15,18 @@
 /* buffer for transmitted data */
 typedef struct  
 {
-	uint8_t marker;						//!< marker to next character to send
-	uint8_t length;						//!< length of the uart buffer
-	char buffer[UART_TRANSMIT_BUFFER_LENGTH];	//!< buffer for storing data
+	volatile uint8_t marker;						//!< marker to next character to send
+	volatile uint8_t length;						//!< length of the uart buffer
+	volatile char buffer[UART_TRANSMIT_BUFFER_LENGTH];	//!< buffer for storing data
 } uart_transmit_buffer_t;
 
 /* buffer for received data */
 typedef struct
 {
-	uint8_t marker;						//!< marker to next character to send
-	uint8_t length;						//!< length of the uart buffer
-	uint8_t enter;						//!< marks received enter characters
-	char buffer[UART_RECIEVE_BUFFER_LENGTH];	//!< buffer for storing data
+	volatile uint8_t marker;						//!< marker to next character to send
+	volatile uint8_t length;						//!< length of the uart buffer
+	volatile uint8_t enter;						//!< marks received enter characters
+	volatile char buffer[UART_RECIEVE_BUFFER_LENGTH];	//!< buffer for storing data
 } uart_recieve_buffer_t;
 
 /* FUNCTION DECLARATIONS *******************************************/

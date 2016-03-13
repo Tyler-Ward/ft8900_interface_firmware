@@ -17,10 +17,12 @@
 #include "error_buffer.h"
 #include "driver_usb_uart.h"
 #include "string_decoder.h"
-#include "stream_processor.h"
+#include "character_map.h"
 
 #include "head_codes.h"
 #include "body_codes.h"
+
+#include "stream_processor.h"
 
 stream_buffer_t bodyInput;
 stream_buffer_t bodyOutput;
@@ -207,6 +209,89 @@ int StreamProcessorBodyReturn(lcd_segment segment)
 	return(SUCCESS);									//completed
 }
 
+/*!
+ * Sets the string on the display to the sent string
+ *
+ * \return out of ranges errors or #SUCCESS
+ */
+int StreamProcessorBodySetText(const lcd_string* const string,char* text)
+{
+	int i=0;
+	int strptr=0;
+	
+	for(i=0;i<string->length;i++)
+	{
+		char character=text[strptr];
+		
+		if(character=='\0'||character=='\r'||character=='\n')	//if string has ended
+		{
+			character=' ';	//set character to space instead
+		}
+		else
+		{
+			strptr++;
+		}
+		
+		StreamProcessorSetCharacter(string->characters[i],character);
+	}
+	return(SUCCESS);
+}
+
+int StreamProcessorBodyReturnText(const lcd_string* const string)
+{
+	int i=0;
+	
+	for(i=0;i<string->length;i++)
+	{
+		StreamProcessorReturnCharacter(string->characters[i]);
+	}
+	return(SUCCESS);
+}
+
+int StreamProcessorSetCharacter(const lcd_character* const character,char letter)
+{
+	charmap_t map;
+	map.map = charmap[letter-CHARMAP_OFFSET].map;
+	
+	StreamProcessorBodyValue(character->A,map.A);
+	StreamProcessorBodyValue(character->B,map.B);
+	StreamProcessorBodyValue(character->C,map.C);
+	StreamProcessorBodyValue(character->D,map.D);
+	StreamProcessorBodyValue(character->E,map.E);
+	StreamProcessorBodyValue(character->F,map.F);
+	StreamProcessorBodyValue(character->G1,map.G1);
+	StreamProcessorBodyValue(character->G2,map.G2);
+	StreamProcessorBodyValue(character->H,map.H);
+	StreamProcessorBodyValue(character->IL,map.IL);
+	StreamProcessorBodyValue(character->J,map.J);
+	StreamProcessorBodyValue(character->K,map.K);
+	StreamProcessorBodyValue(character->M,map.M);
+	StreamProcessorBodyValue(character->DP,0);
+	
+	return(SUCCESS);
+}
+
+int StreamProcessorReturnCharacter(const lcd_character* const character)
+{
+	
+	StreamProcessorBodyReturn(character->A);
+	StreamProcessorBodyReturn(character->B);
+	StreamProcessorBodyReturn(character->C);
+	StreamProcessorBodyReturn(character->D);
+	StreamProcessorBodyReturn(character->E);
+	StreamProcessorBodyReturn(character->F);
+	StreamProcessorBodyReturn(character->G1);
+	StreamProcessorBodyReturn(character->G2);
+	StreamProcessorBodyReturn(character->H);
+	StreamProcessorBodyReturn(character->IL);
+	StreamProcessorBodyReturn(character->J);
+	StreamProcessorBodyReturn(character->K);
+	StreamProcessorBodyReturn(character->M);
+	StreamProcessorBodyReturn(character->DP);
+	
+	return(SUCCESS);
+}
+
 /* body receive interrupt */
 ISR(USART1_RX_vect)
 {
@@ -231,6 +316,7 @@ ISR(USART1_RX_vect)
 	
 	bodyInput.writeposition++;		//increment write pointer
 	
+	//todo remove this while loop?
 	while ((UCSR2A & (1 << UDRE2)) == 0);		// Do nothing until UDR is ready for more data to be written to it
 	UDR2 = output;
 		
@@ -256,6 +342,7 @@ ISR(USART2_RX_vect)
 	headInput.array[headInput.writeposition]=received;	//store data in the buffer
 	headInput.writeposition++;		//increment write pointer
 	
+	//todo remove this while loop?
 	while ((UCSR1A & (1 << UDRE1)) == 0);		// Do nothing until UDR is ready for more data to be written to it
 	UDR1 = received;
 }

@@ -30,6 +30,12 @@ int StreamProcessorBodyClear(lcd_segment segment);
 int StreamProcessorBodyValue(lcd_segment segment,uint8_t value);
 int StreamProcessorBodyReturn(lcd_segment segment);
 
+int StreamProcessorBodySetText(const lcd_string* const string,char*test);
+int StreamProcessorSetCharacter(const lcd_character* const character,char letter);
+
+int StreamProcessorBodyReturnText(const lcd_string* const string);
+int StreamProcessorReturnCharacter(const lcd_character* const character);
+
 extern stream_buffer_t headInput;
 extern stream_buffer_t bodyInput;
 

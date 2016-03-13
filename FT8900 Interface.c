@@ -35,12 +35,13 @@ int main(void)
 	
 	sei();											//enable global interrupts
 	
-	DriverUSBUartPut("Booted\r\n",8);
+	ErrorBufferPut(INF_BOOT);						//log that we have booted
+	DriverUSBUartPut("Booted\r\n",8);				//print that we have booted on the USB console
 	
     while(1)
     {
-		StreamProcessorProcess();
-		UsbConsoleProcess();
+		StreamProcessorProcess();					//run the stream processor
+		UsbConsoleProcess();						//check for incoming commands
 
     }
 }

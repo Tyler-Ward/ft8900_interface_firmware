@@ -23,6 +23,7 @@
 #include "head_codes.h"
 #include "body_codes.h"
 
+/*! Create command table */
 static command_t commands[] = {
 	{"AT+ERRORS", handler_error},
 	{"AT+VOLUME", handler_volume},
@@ -44,41 +45,47 @@ char ReceivedByte;
 char str[64];
 int i=0;
 
+/*!
+ * Checks for incoming commands and starts processing if required.
+ *
+ * \retval any errors encounted in starting the next command
+ */
 int UsbConsoleProcess()
 {
 	//check USB commands
 	if (uartRecieveBuffer.enter)			// has a byte been received from the body
 	{
-		DriverUSBUartPut("\r\n",2);
+		DriverUSBUartPut("\r\n",2);			// print a newline
+		//todo load data into new buffer to avoid rungbuffer issues
 		UsbConsoleInterpretCommand(&(uartRecieveBuffer.buffer[uartRecieveBuffer.marker]),10);
 		
-		uartRecieveBuffer.enter=0;
-		uartRecieveBuffer.length=0;
+		//todo check for multiple commands at once
+		uartRecieveBuffer.enter=0;			//command has been completed
+		uartRecieveBuffer.length=0;			//no data in buffer
 	}
 	return(SUCCESS);
 }
 
+/*!
+ * Produces a debug output of a character string from the body unit
+ *
+ * \retval errors on command processing or #SUCCESS if command ran successfully
+ */
 int UsbConsoleInterpretCommand(char *command,uint8_t command_length)
 {
-	uint8_t i = 0;
+	uint8_t i = 0;					//variable to itterate through command list
 	
-	while(commands[i].handler)
+	while(commands[i].handler)		//while there are commands in the command list
 	{
-		if(!strncmp(commands[i].commandName,command,strlen(commands[i].commandName)))
+		if(!strncmp(commands[i].commandName,command,strlen(commands[i].commandName)))	//if the command matches
 		{
 			commands[i].handler((void *) command);	//call the command
 			return(SUCCESS);						//exit while loop
 		}
-		i++;	//increment iterable
+		i++;	//move ontop the next command
 	}
 	
-
-	return(ERR_COMMAND_NOT_FOUND);
-}
-
-static void handler_error(void *command)
-{
-	DriverUSBUartPutString("ERRORS\r\n");
+	return(ERR_COMMAND_NOT_FOUND);	//report that the command could not be found
 }
 
 static void handler_volume(void *command)

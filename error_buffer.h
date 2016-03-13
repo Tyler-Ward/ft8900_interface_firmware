@@ -24,4 +24,6 @@ typedef struct ErrorBuffer
 int ErrorBufferInit();
 int ErrorBufferPut(int error);
 
+void handler_error(void *command);
+
 #endif /* ERROR_BUFFER_H_ */

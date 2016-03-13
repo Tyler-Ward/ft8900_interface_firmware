@@ -15,6 +15,7 @@
 #include "string_decoder.h"
 #include "body_codes.h"
 #include "character_map.h"
+#include "driver_usb_uart.h"
 
 /*! decodes a character from the LCD feed
  *
@@ -74,77 +75,71 @@ char decode_char(char* data,const lcd_character* letter)
  */
 int print_segments(charmap_t display)
 {
-	//todo use a better print function
+	char str[20];	//string to store result in
+	uint8_t strptr=0;	//pointer to first letter in string
+
+
 	if(display.A)
 	{
-			while ((UCSR0A & (1 << UDRE0)) == 0);
-			UART_USB_DATA='A';
+		str[strptr++]='A';
 	}
 	if(display.B)
 	{
-		while ((UCSR0A & (1 << UDRE0)) == 0);
-		UART_USB_DATA='B';
+		str[strptr++]='B';
 	}
 	if(display.C)
 	{
-		while ((UCSR0A & (1 << UDRE0)) == 0);
-		UART_USB_DATA='C';
+		str[strptr++]='C';
 	}
 	if(display.D)
 	{
-		while ((UCSR0A & (1 << UDRE0)) == 0);
-		UART_USB_DATA='D';
+		str[strptr++]='D';
 	}
 	if(display.E)
 	{
-		while ((UCSR0A & (1 << UDRE0)) == 0);
-		UART_USB_DATA='E';
+		str[strptr++]='E';
 	}
 	if(display.F)
 	{
-		while ((UCSR0A & (1 << UDRE0)) == 0);
-		UART_USB_DATA='F';
+		str[strptr++]='F';
 	}
 	if(display.G1)
 	{
-		while ((UCSR0A & (1 << UDRE0)) == 0);
-		UART_USB_DATA='G';
+		str[strptr++]='G';
+		str[strptr++]='1';
 	}
 	if(display.G2)
 	{
-		while ((UCSR0A & (1 << UDRE0)) == 0);
-		UART_USB_DATA='g';
+		str[strptr++]='G';
+		str[strptr++]='2';
 	}
 	if(display.H)
 	{
-		while ((UCSR0A & (1 << UDRE0)) == 0);
-		UART_USB_DATA='H';
+		str[strptr++]='H';
 	}
 	if(display.IL)
 	{
-		while ((UCSR0A & (1 << UDRE0)) == 0);
-		UART_USB_DATA='I';
+		str[strptr++]='I';
+		str[strptr++]='L';
 	}
 	if(display.J)
 	{
-		while ((UCSR0A & (1 << UDRE0)) == 0);
-		UART_USB_DATA='J';
+		str[strptr++]='J';
 	}
 	if(display.K)
 	{
-		while ((UCSR0A & (1 << UDRE0)) == 0);
-		UART_USB_DATA='K';
+		str[strptr++]='K';
 	}
 	if(display.M)
 	{
-		while ((UCSR0A & (1 << UDRE0)) == 0);
-		UART_USB_DATA='M';
+		str[strptr++]='M';
 	}
 	
-	//print trailing slash
-	while ((UCSR0A & (1 << UDRE0)) == 0);
-	UART_USB_DATA='/';
-	return(SUCCESS);	//return success
+
+	str[strptr++]='/';				//print trailing slash
+	str[strptr++]='\0';				//null terminate the sting
+	DriverUSBUartPutString(str);	//transmit the string
+	return(SUCCESS);				//return success
 }
 
 /*! decodes a string from the LCD feed

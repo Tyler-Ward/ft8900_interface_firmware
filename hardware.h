@@ -21,6 +21,8 @@
 #define UART_USB_RX_PIN PE0					//!< USART RX pin
 
 #define UART_USB_DATA UDR0					//!< USART Data register
+#define UART_USB_RX_vect USART0_RX_vect	//!< UART Receive interrupt vector
+#define UART_USB_UDRE_vect USART0_UDRE_vect //!< UART data register empty vector
 
 /* HEAD INTERFACE **************************************************/
 
@@ -32,6 +34,7 @@
 #define UART_HEAD_RX_PIN PH0				//!< USART RX pin
 
 #define UART_HEAD_DATA UDR2					//!< USART Data register
+#define UART_HEAD_RX_vect USART2_RX_vect	//!< UART Receive interrupt vector
 
 /* BODY INTERFACE **************************************************/
 
@@ -43,6 +46,7 @@
 #define UART_BODY_RX_PIN PD2				//!< USART RX pin
 
 #define UART_BODY_DATA UDR1					//!< USART Data register
+#define UART_BODY_RX_vect USART1_RX_vect	//!< UART Receive interrupt vector
 
 /* POWER SWITCH ****************************************************/
 

@@ -81,26 +81,26 @@ int DriverUSBUartPutString(char* text)
  */
 int DriverUSBUartLoadCharacter()
 {
-	if(uartTransmitBuffer.length>0)
+	if(uartTransmitBuffer.length>0)		//if there is more data to send
 	{
-		if(UCSR0A & (1 << UDRE0))
+		if(UCSR0A & (1 << UDRE0))		//check that we can load in data (can be called when data is already in the buffer)
 		{
-			UART_USB_DATA=uartTransmitBuffer.buffer[uartTransmitBuffer.marker];
-			uartTransmitBuffer.marker=(uartTransmitBuffer.marker+1)%UART_TRANSMIT_BUFFER_LENGTH;
-			uartTransmitBuffer.length--;
+			UART_USB_DATA=uartTransmitBuffer.buffer[uartTransmitBuffer.marker];		//load data into the buffer
+			uartTransmitBuffer.marker=(uartTransmitBuffer.marker+1)%UART_TRANSMIT_BUFFER_LENGTH;	//advance the ring buffer marker
+			uartTransmitBuffer.length--;	//reduce count of data in buffer
 		}
 	}
 	else
 	{
-		UCSR0B &= ~(1<<UDRIE0);
+		UCSR0B &= ~(1<<UDRIE0);			//if no more data to send then disable RX empty interrupts
 	}
-	return(SUCCESS);
+	return(SUCCESS);					//completed
 }
 
 /*!USB Uart receive interrupt
  *
  */
-ISR(USART0_RX_vect)
+ISR(UART_USB_RX_vect)
 {
 	char data = UART_USB_DATA;	//collect data from interface
 
@@ -124,7 +124,7 @@ ISR(USART0_RX_vect)
 /*!USB Uart transmit interrupt
  *
  */
-ISR(USART0_UDRE_vect)
+ISR(UART_USB_UDRE_vect)
 {
 	DriverUSBUartLoadCharacter(); //trigger transmission of next byte
 }

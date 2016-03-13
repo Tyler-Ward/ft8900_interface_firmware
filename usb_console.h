@@ -9,17 +9,18 @@
 #ifndef USB_CONSOLE_H_
 #define USB_CONSOLE_H_
 
+/*! Command storage structure */
 typedef struct
 {
 	const char *commandName;
 	void (*handler) (void*);
 } command_t;
 
+/* FUNCTIION DECLARATIONS ******************************************/
 
 int UsbConsoleProcess();
 int UsbConsoleInterpretCommand(char *command,uint8_t command_length);
 
-static void handler_error(void *command);
 static void handler_volume(void *command);
 static void handler_read_display(void *command);
 static void handler_display_read_debug(void *command);

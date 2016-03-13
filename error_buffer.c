@@ -5,8 +5,13 @@
  *  Author: Tyler
  */ 
 
+#include <string.h>
+#include <stdio.h>
+
 #include "error_codes.h"
 #include "error_buffer.h"
+
+#include "driver_usb_uart.h"
 
 static volatile ErrorBuffer	errorBuffer;	//the buffer to store errors in
 
@@ -35,4 +40,28 @@ int ErrorBufferPut(int error)
 	errorBuffer.marker=(errorBuffer.marker+1)%ERROR_BUFFER_LENGTH;	//increment the marker rolling over at the end of the buffer
 	errorBuffer.count++;					//increment the error count
 	return(SUCCESS);
+}
+
+/*!
+ * Add an error to the buffer
+ *
+ * \param error The error code to be stored
+ * \return #SUCCESS as cannot fail
+ */
+void handler_error(void *command)
+{
+	char str[32];
+	
+	sprintf(str,"ERRORS: %d\r\n",errorBuffer.count);
+	DriverUSBUartPutString(str);
+	
+	int i=0;
+	int length=(errorBuffer.count<ERROR_BUFFER_LENGTH)?errorBuffer.count:ERROR_BUFFER_LENGTH;
+	
+	for(i=0;i<length;i++)
+	{
+		sprintf(str,"%d\r\n",errorBuffer.buffer[(errorBuffer.marker-length+i)%ERROR_BUFFER_LENGTH]);
+		DriverUSBUartPutString(str);
+	}
+	
 }

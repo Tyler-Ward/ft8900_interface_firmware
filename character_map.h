@@ -9,7 +9,7 @@
 #ifndef CHARACTER_MAP_H_
 #define CHARACTER_MAP_H_
 
-/* A structure to store compressed character maps*/
+/*! A structure to store compressed character maps*/
 typedef union
 {
 	uint16_t map;			//!< compressed map

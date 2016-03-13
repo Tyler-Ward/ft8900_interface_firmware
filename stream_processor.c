@@ -24,14 +24,12 @@
 
 #include "stream_processor.h"
 
-stream_buffer_t bodyInput;
-stream_buffer_t bodyOutput;
+stream_buffer_t bodyInput;					//!< input stream from the body
 
-stream_buffer_t headInput;
-stream_buffer_t headOutput;
+stream_buffer_t headInput;					//!< input stream from the head
 
-char bodyStreamMask[BODY_STREAM_LENGTH];
-char bodyStreamData[BODY_STREAM_LENGTH];
+char bodyStreamMask[BODY_STREAM_LENGTH];	//!< stores the mask for the stream modifications
+char bodyStreamData[BODY_STREAM_LENGTH];	//!< stores the data for the modified stream
 
 /*!
  * Sets up the stream processor and associated UARTS
@@ -86,41 +84,6 @@ int StreamProcessorInit()
  */
 int StreamProcessorProcess()
 {
-		
-	/*
-	//retransmit head
-	if(headInput.readposition>=HEAD_STREAM_LENGTH&&headInput.next)	//check for new buffer loads
-	{
-		headInput.readposition=0;
-		headInput.next=0;
-	}
-		
-	if ((headInput.writeposition>headInput.readposition)||(headInput.next && headInput.readposition<HEAD_STREAM_LENGTH))			// has a byte been received from the head
-	{
-		char byte = headInput.array[headInput.readposition];	// Fetch the received byte value from the input buffer
-		headInput.readposition++;
-				
-		while ((UCSR1A & (1 << UDRE1)) == 0);		// Do nothing until UDR is ready for more data to be written to it
-		UDR1 = byte;
-	}
-
-	//retransmit body
-	if(bodyInput.readposition>=BODY_STREAM_LENGTH&&bodyInput.next)	//check for new buffer loads
-	{
-		bodyInput.readposition=0;
-		bodyInput.next=0;
-	}
-		
-	if ((bodyInput.writeposition>bodyInput.readposition)||(bodyInput.next && bodyInput.readposition<BODY_STREAM_LENGTH))			// has a byte been received from the head
-	{
-		char byte = bodyInput.array[bodyInput.readposition];	// Fetch the received byte value from the input buffer
-		bodyInput.readposition++;
-				
-		while ((UCSR2A & (1 << UDRE2)) == 0);		// Do nothing until UDR is ready for more data to be written to it
-		UDR2 = byte;
-	}
-	*/
-		
 		return(SUCCESS);
 }
 
@@ -216,12 +179,12 @@ int StreamProcessorBodyReturn(lcd_segment segment)
  */
 int StreamProcessorBodySetText(const lcd_string* const string,char* text)
 {
-	int i=0;
-	int strptr=0;
+	int i=0;						//create an variable for iterating through the characters
+	int strptr=0;					//create a variable for moving through the string
 	
-	for(i=0;i<string->length;i++)
+	for(i=0;i<string->length;i++)	//for each character in the lcd string
 	{
-		char character=text[strptr];
+		char character=text[strptr];	//load the next characted from the string
 		
 		if(character=='\0'||character=='\r'||character=='\n')	//if string has ended
 		{
@@ -229,14 +192,19 @@ int StreamProcessorBodySetText(const lcd_string* const string,char* text)
 		}
 		else
 		{
-			strptr++;
+			strptr++;		//if there are more characters in the string move onto the next one
 		}
 		
-		StreamProcessorSetCharacter(string->characters[i],character);
+		StreamProcessorSetCharacter(string->characters[i],character);	//set the character
 	}
-	return(SUCCESS);
+	return(SUCCESS);		//all done
 }
 
+/*!
+ * Returns control of the string on the display to the body
+ *
+ * \return out of ranges errors or #SUCCESS
+ */
 int StreamProcessorBodyReturnText(const lcd_string* const string)
 {
 	int i=0;
@@ -248,11 +216,17 @@ int StreamProcessorBodyReturnText(const lcd_string* const string)
 	return(SUCCESS);
 }
 
+/*!
+ * Sets a character on the display to a given letter
+ *
+ * \return out of ranges errors or #SUCCESS
+ */
 int StreamProcessorSetCharacter(const lcd_character* const character,char letter)
 {
-	charmap_t map;
-	map.map = charmap[letter-CHARMAP_OFFSET].map;
+	charmap_t map;									//charmap to load into
+	map.map = charmap[letter-CHARMAP_OFFSET].map;	//lookup map in the character map
 	
+	//set character elements to the valus in the map
 	StreamProcessorBodyValue(character->A,map.A);
 	StreamProcessorBodyValue(character->B,map.B);
 	StreamProcessorBodyValue(character->C,map.C);
@@ -268,12 +242,18 @@ int StreamProcessorSetCharacter(const lcd_character* const character,char letter
 	StreamProcessorBodyValue(character->M,map.M);
 	StreamProcessorBodyValue(character->DP,0);
 	
-	return(SUCCESS);
+	return(SUCCESS);	//character has been set
 }
 
+/*!
+ * Returns control of the character on the display to the body
+ *
+ * \return out of ranges errors or #SUCCESS
+ */
 int StreamProcessorReturnCharacter(const lcd_character* const character)
 {
 	
+	//clear the mask and retuen control to the body
 	StreamProcessorBodyReturn(character->A);
 	StreamProcessorBodyReturn(character->B);
 	StreamProcessorBodyReturn(character->C);
@@ -289,21 +269,20 @@ int StreamProcessorReturnCharacter(const lcd_character* const character)
 	StreamProcessorBodyReturn(character->M);
 	StreamProcessorBodyReturn(character->DP);
 	
-	return(SUCCESS);
+	return(SUCCESS);	//complete
 }
 
 /* body receive interrupt */
-ISR(USART1_RX_vect)
+ISR(UART_BODY_RX_vect)
 {
-	//DriverUSBUartPut("B",1);
-	char received = UDR1;			//read byte from serial port
+	char received = UART_BODY_DATA;			//read byte from serial port
 	
 	if(received&0x80)				//is this the first byte in the chain
 	{
-		bodyInput.writeposition=0;	
+		bodyInput.writeposition=0;	//if this is the first byte move to start of buffer
 	}
 	
-	if(bodyInput.writeposition>=BODY_STREAM_LENGTH)	//check for unexpected data
+	if(bodyInput.writeposition>=BODY_STREAM_LENGTH)			//check for unexpected data
 	{
 		ErrorBufferPut(ERR_STREAM_BODY_STREAM_TOO_LONG);	//report this error
 		return;		//exit ISR
@@ -311,26 +290,25 @@ ISR(USART1_RX_vect)
 	
 	bodyInput.array[bodyInput.writeposition]=received;	//store data in the buffer
 	
-	//perform stream manipulation
+	//perform stream manipulation (and the data with the inverted bitmask then or with the bitmasked data)
 	char output = (received & ~bodyStreamMask[bodyInput.writeposition]) | (bodyStreamMask[bodyInput.writeposition] & bodyStreamData[bodyInput.writeposition]);
 	
 	bodyInput.writeposition++;		//increment write pointer
 	
 	//todo remove this while loop?
 	while ((UCSR2A & (1 << UDRE2)) == 0);		// Do nothing until UDR is ready for more data to be written to it
-	UDR2 = output;
+	UART_HEAD_DATA = output;					//send this data onwards to the head
 		
 }
 
 /* head receive interrupt */
-ISR(USART2_RX_vect)
+ISR(UART_HEAD_RX_vect)
 {
-	//DriverUSBUartPut("H",1);
-	char received = UDR2;			//read byte from serial port
+	char received = UART_HEAD_DATA;			//read byte from serial port
 	
 	if(received&0x80)				//is this the first byte in the chain
 	{
-		headInput.writeposition=0;
+		headInput.writeposition=0;	//if this is the first byte move to start of buffer
 	}
 	
 	if(headInput.writeposition>=HEAD_STREAM_LENGTH)	//check for unexpected data
@@ -344,17 +322,5 @@ ISR(USART2_RX_vect)
 	
 	//todo remove this while loop?
 	while ((UCSR1A & (1 << UDRE1)) == 0);		// Do nothing until UDR is ready for more data to be written to it
-	UDR1 = received;
-}
-
-/* body transmit interrupt */
-ISR(USART1_UDRE_vect)
-{
-	
-}
-
-/* head transmit interrupt */
-ISR(USART2_UDRE_vect)
-{
-	
+	UART_BODY_DATA = received;					//send this data onwards to the body
 }

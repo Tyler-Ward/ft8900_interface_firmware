@@ -12,7 +12,7 @@
 #define BODY_STREAM_LENGTH 42
 #define HEAD_STREAM_LENGTH 13
 
-/*struct for body data*/
+/*! struct for storing buffered data*/
 typedef struct  
 {
 	uint8_t writeposition;
@@ -21,6 +21,7 @@ typedef struct
 	char array[64];
 } stream_buffer_t;
 
+/* FUNCTION DECLARATIONS *******************************************/
 
 int StreamProcessorInit();
 int StreamProcessorProcess();

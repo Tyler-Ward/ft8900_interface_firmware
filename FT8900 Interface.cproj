@@ -175,6 +175,12 @@
     <Compile Include="string_decoder.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="usb_console.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="usb_console.h">
+      <SubType>compile</SubType>
+    </Compile>
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
 </Project>

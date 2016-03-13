@@ -15,8 +15,8 @@
 
 /* USB UART ********************************************************/
 
-#define ERR_USB_UART_TRANSMIT_BUFFER_FULL 10	//!< USB tranmit buffer full
-#define ERR_USB_UART_RECIEVE_BUFFER_FULL 11		//!< USB recieve buffer overflow
+#define ERR_USB_UART_TRANSMIT_BUFFER_FULL 10	//!< USB transmit buffer full
+#define ERR_USB_UART_RECIEVE_BUFFER_FULL 11		//!< USB receive buffer overflow
 
 /* FT8900 UART *****************************************************/
 
@@ -25,5 +25,9 @@
 
 #define ERR_STREAM_SEGMENT_BYTE_OUT_OF_RANGE 22	//!< byte of the LCD segment is out of range
 #define ERR_STREAM_SEGMENT_BIT_OUT_OF_RANGE 23	//!< bit of the LCD segment is out of range
+
+/* USB Console *****************************************************/
+
+#define ERR_COMMAND_NOT_FOUND 30				//!< no command found
 
 #endif /* ERROR_CODES_H_ */

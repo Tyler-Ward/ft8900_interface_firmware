@@ -136,6 +136,12 @@
     <Compile Include="character_map.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="function_debug.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="function_debug.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="driver_usb_uart.c">
       <SubType>compile</SubType>
     </Compile>
@@ -152,6 +158,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="FT8900 Interface.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="function_autotune.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="function_autotune.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="hardware.h">

@@ -30,4 +30,9 @@
 
 #define ERR_COMMAND_NOT_FOUND 30				//!< no command found
 
+/* Autotuner *******************************************************/
+
+#define ERR_AUTOTUNE_FREQUENCY_INVALID 100		//!< frequency string provided is invalid
+#define ERR_AUTOTUNE_FREQUENCY_NULL_POINTER 101	//!< frequency string starts with a null pointer
+
 #endif /* ERROR_CODES_H_ */

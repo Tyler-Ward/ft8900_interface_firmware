@@ -130,6 +130,12 @@
     <Compile Include="body_codes.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="button_control.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="button_control.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="character_map.c">
       <SubType>compile</SubType>
     </Compile>
@@ -167,6 +173,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="hardware.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="head_codes.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="head_codes.h">

@@ -29,10 +29,14 @@
  */
 void DebugDisplayCharactersFunctionHandler(void *command)
 {
-	char str[32];
+	char str[32];		//string for storeing output in
+	console_status_t *command_status = (console_status_t*) command;	//convert pointer into structure
 	
-	char* strptr=command;	//create a pointer to the command string
-	strptr+=strlen("AT+DEBUG_TEXT");	//advance the string pointer
+	char* strptr;
+	strptr=command_status->command_string;
+	
+	//advance to end of command string
+	strptr+=command_status->command_arg_marker;	//advance the string pointer
 	
 	const lcd_string* string_ref = NULL;		//create a null pointer to the string to process
 	

@@ -12,6 +12,9 @@
 #define BODY_STREAM_LENGTH 42
 #define HEAD_STREAM_LENGTH 13
 
+#include "head_codes.h"
+#include "body_codes.h"
+
 /*! struct for storing buffered data*/
 typedef struct  
 {
@@ -36,6 +39,9 @@ int StreamProcessorSetCharacter(const lcd_character* const character,char letter
 
 int StreamProcessorBodyReturnText(const lcd_string* const string);
 int StreamProcessorReturnCharacter(const lcd_character* const character);
+
+int StreamProcessorHeadSetMask(uint8_t byte,char mask);
+int StreamProcessorHeadSetData(uint8_t byte,char data);
 
 extern stream_buffer_t headInput;
 extern stream_buffer_t bodyInput;

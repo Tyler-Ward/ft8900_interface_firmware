@@ -26,6 +26,10 @@
 //command function files
 #include "function_debug.h"
 #include "function_autotune.h"
+#include "button_control.h"
+
+
+#include <util/delay.h>
 
 /*! Create command table */
 static command_t commands[] = {
@@ -41,6 +45,7 @@ static command_t commands[] = {
 	//test functions
 	{"AT+TEST_SET_DISPLAY",handler_set_display},
 	{"AT+TEST_CLEAR_DISPLAY",handler_clear_display},
+	{"AT+TEST_PRESS_SET",handler_press_set},
 				
 	//null command to end search
 	{0x00,0x00}
@@ -79,8 +84,25 @@ int UsbConsoleProcess()
 	if (uartRecieveBuffer.enter)			// has a byte been received from the body
 	{
 		DriverUSBUartPut("\r\n",2);			// print a newline
-		//todo load data into new buffer to avoid rungbuffer issues
-		UsbConsoleInterpretCommand(&(uartRecieveBuffer.buffer[uartRecieveBuffer.marker]),10);
+		
+		//copy command into console status buffer
+		int i=0;							//value for iterating through provided string
+		while(i<uartRecieveBuffer.length)
+		{
+			char letter=uartRecieveBuffer.buffer[(uartRecieveBuffer.marker+i)%UART_RECIEVE_BUFFER_LENGTH];
+			if (letter=='\r' || letter=='\n' || letter=='\0')
+			{
+				console_status.command_string[i]='\0';	//null terminate command
+				break;
+			}
+			console_status.command_string[i]=letter;	//add letter to string
+			i++;										//move to next letter
+		}
+		DriverUSBUartPutString(console_status.command_string);
+		
+		console_status.command_length=i;				//save command length
+		
+		UsbConsoleInterpretCommand(&console_status);
 		
 		//todo check for multiple commands at once
 		uartRecieveBuffer.enter=0;			//command has been completed
@@ -94,16 +116,17 @@ int UsbConsoleProcess()
  *
  * \retval errors on command processing or #SUCCESS if command ran successfully
  */
-int UsbConsoleInterpretCommand(char *command,uint8_t command_length)
+int UsbConsoleInterpretCommand(console_status_t *console_status)
 {
-	uint8_t i = 0;					//variable to itterate through command list
+	uint8_t i = 0;					//variable to iterate through command list
 	
-	while(commands[i].handler)		//while there are commands in the command list
+	while(console_status->command_list[i].handler)		//while there are commands in the command list
 	{
-		if(!strncmp(commands[i].commandName,command,strlen(commands[i].commandName)))	//if the command matches
+		if(!strncmp(console_status->command_list[i].commandName,console_status->command_string,strlen(console_status->command_list[i].commandName)))	//if the command matches
 		{
-			commands[i].handler((void *) command);	//call the command
-			return(SUCCESS);						//exit while loop
+			console_status->command_arg_marker=strlen(console_status->command_list[i].commandName);		//store the length of the command
+			console_status->command_list[i].handler((void *) console_status);							//call the command
+			return(SUCCESS);																			//exit while loop
 		}
 		i++;	//move ontop the next command
 	}
@@ -142,4 +165,17 @@ void handler_set_display(void *command)
 void handler_clear_display(void *command)
 {
 	StreamProcessorBodyReturnText(&LEFT_NAME);
+}
+
+void handler_press_set(void *command)
+{
+	DriverUSBUartPutString("typing 145350");
+	//ButtonControlPress((head_button_t){MIC_SW1_LOC,MIC_SW1_ACC,0});
+	ButtonControlPress2((head_button_t){MIC_48_SW2_LOC,KEYPAD_MAP[1][1],0},(head_button_t){MIC_48_SW1_LOC,KEYPAD_MAP[1][0],0});
+	ButtonControlPress2((head_button_t){MIC_48_SW2_LOC,KEYPAD_MAP[4][1],0},(head_button_t){MIC_48_SW1_LOC,KEYPAD_MAP[4][0],0});
+	ButtonControlPress2((head_button_t){MIC_48_SW2_LOC,KEYPAD_MAP[5][1],0},(head_button_t){MIC_48_SW1_LOC,KEYPAD_MAP[5][0],0});
+	ButtonControlPress2((head_button_t){MIC_48_SW2_LOC,KEYPAD_MAP[3][1],0},(head_button_t){MIC_48_SW1_LOC,KEYPAD_MAP[3][0],0});
+	ButtonControlPress2((head_button_t){MIC_48_SW2_LOC,KEYPAD_MAP[5][1],0},(head_button_t){MIC_48_SW1_LOC,KEYPAD_MAP[5][0],0});
+	ButtonControlPress2((head_button_t){MIC_48_SW2_LOC,KEYPAD_MAP[0][1],0},(head_button_t){MIC_48_SW1_LOC,KEYPAD_MAP[0][0],0});
+	DriverUSBUartPutString("typeing done");
 }

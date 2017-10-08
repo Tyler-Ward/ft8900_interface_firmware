@@ -33,6 +33,8 @@ int main(void)
 	DriverUSBUartInit();							//initilise the USB uart driver;
 	StreamProcessorInit();							//sets up the processor for the 8900 data stream
 	
+	UsbConsoleInit();								//sets up the USB console environment
+	
 	sei();											//enable global interrupts
 	
 	ErrorBufferPut(INF_BOOT);						//log that we have booted

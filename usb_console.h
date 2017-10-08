@@ -24,7 +24,6 @@ typedef struct
 	char command_string[32];		//command buffer
 	uint8_t command_length;			//!< length of the command
 	uint8_t command_arg_marker;		//!< marker to the start of the command arguments
-	uint8_t argc;					//!< count of arguments in command
 	
 	//command status
 	uint8_t command_status;			//!< status of the command (used for commands that take time to complete)
@@ -37,12 +36,13 @@ typedef struct
 
 int UsbConsoleInit();
 int UsbConsoleProcess();
-int UsbConsoleInterpretCommand(char *command,uint8_t command_length);
+int UsbConsoleInterpretCommand(console_status_t *command_status);
 
 void handler_volume(void *command);
 void handler_read_display(void *command);
 void handler_set_display(void *command);
 void handler_clear_display(void *command);
+void handler_press_set(void *command);
 
 
 #endif /* USB_CONSOLE_H_ */

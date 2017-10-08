@@ -31,6 +31,9 @@ stream_buffer_t headInput;					//!< input stream from the head
 char bodyStreamMask[BODY_STREAM_LENGTH];	//!< stores the mask for the stream modifications
 char bodyStreamData[BODY_STREAM_LENGTH];	//!< stores the data for the modified stream
 
+char headStreamMask[HEAD_STREAM_LENGTH];	//!< stores the mask for the stream modifications
+char headStreamData[HEAD_STREAM_LENGTH];	//!< stores the data for the modified stream
+
 /*!
  * Sets up the stream processor and associated UARTS
  *
@@ -69,6 +72,11 @@ int StreamProcessorInit()
 		for(i=0;i<BODY_STREAM_LENGTH;i++)
 		{
 			bodyStreamMask[i]=0;
+		}
+		
+		for(i=0;i<HEAD_STREAM_LENGTH;i++)
+		{
+			headStreamMask[i]=0;
 		}
 		
 		DriverUSBUartPutString("Stream running\r\n");
@@ -272,6 +280,38 @@ int StreamProcessorReturnCharacter(const lcd_character* const character)
 	return(SUCCESS);	//complete
 }
 
+/*!
+ * Sets the mask for a given byte.
+ *
+ * \return out of ranges errors or #SUCCESS
+ */
+int StreamProcessorHeadSetMask(uint8_t byte,char mask)
+{
+	if(byte>HEAD_STREAM_LENGTH)					//check for bytes out of range
+	{
+		return(ERR_STREAM_SEGMENT_BYTE_OUT_OF_RANGE);	//report this error
+	}
+	
+	headStreamMask[byte]=mask&0x7F;				//set mask (exclude highest bit)
+	return(SUCCESS);									//completed
+}
+
+/*!
+ * Sets the data for a given byte.
+ *
+ * \return out of ranges errors or #SUCCESS
+ */
+int StreamProcessorHeadSetData(uint8_t byte,char data)
+{
+	if(byte>HEAD_STREAM_LENGTH)					//check for bytes out of range
+	{
+		return(ERR_STREAM_SEGMENT_BYTE_OUT_OF_RANGE);	//report this error
+	}
+	
+	headStreamData[byte]=data;				//set data
+	return(SUCCESS);									//completed
+}
+
 /* body receive interrupt */
 ISR(UART_BODY_RX_vect)
 {
@@ -318,9 +358,13 @@ ISR(UART_HEAD_RX_vect)
 	}
 	
 	headInput.array[headInput.writeposition]=received;	//store data in the buffer
+	
+	//perform stream manipulation (and the data with the inverted bitmask then or with the bitmasked data)
+	char output = (received & ~headStreamMask[headInput.writeposition]) | (headStreamMask[headInput.writeposition] & headStreamData[headInput.writeposition]);
+	
 	headInput.writeposition++;		//increment write pointer
 	
 	//todo remove this while loop?
 	while ((UCSR1A & (1 << UDRE1)) == 0);		// Do nothing until UDR is ready for more data to be written to it
-	UART_BODY_DATA = received;					//send this data onwards to the body
+	UART_BODY_DATA = output;					//send this data onwards to the body
 }

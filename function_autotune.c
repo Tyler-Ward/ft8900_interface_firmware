@@ -24,22 +24,24 @@
 #include "head_codes.h"
 #include "body_codes.h"
 
+#include "button_control.h"
+
 void AutotuneFunctionHandler (void* command)
 {
-	char* cmdptr;
-	cmdptr=command;
-
+	console_status_t *command_status = (console_status_t*) command;
 	
-	//advance to end of command string
-	cmdptr+=strlen("AT+TUNE");	//advance the string pointer
+	char* cmdptr;								//create cmdptr that can pass through the command string
+	cmdptr=command_status->command_string;		//point cmdptr at the start of the string
+	cmdptr+=command_status->command_arg_marker;	//advance the string pointer to start of arguments
 	
-	if(*cmdptr==' ')
+	if(*cmdptr==' ')							//check if we have arguments
 	{
-		cmdptr++;
+		cmdptr++;								//advance onwards
 	}
 	else
 	{
 		DriverUSBUartPutString("No frequency provided\r\n");
+		return;
 	}
 	
 	int Mhz;
@@ -53,6 +55,7 @@ void AutotuneFunctionHandler (void* command)
 	else
 	{
 		DriverUSBUartPutString("Invalid Frequency Format\r\n");
+		return;
 	}
 	
 	char memory[6];		//store memory location
@@ -63,8 +66,25 @@ void AutotuneFunctionHandler (void* command)
 	}
 	else
 	{
-		DriverUSBUartPutString("in mememory mode\r\n");
+		DriverUSBUartPutString("in memory mode\r\n");
+		ButtonControlPress((head_button_t){KEY1_LOC,KEY1_VM,0});	//go to vfo mode
 	}
+	
+	int digit1=(Mhz/100)%10;
+	int digit2=(Mhz/10)%10;
+	int digit3=(Mhz)%10;
+	int digit4=(Khz/100)%10;
+	int digit5=(Khz/10)%10;
+	int digit6=(Khz)%10;
+	
+	//type in frequency
+	ButtonControlPress2((head_button_t){MIC_48_SW2_LOC,KEYPAD_MAP[digit1][1],0},(head_button_t){MIC_48_SW1_LOC,KEYPAD_MAP[digit1][0],0});
+	ButtonControlPress2((head_button_t){MIC_48_SW2_LOC,KEYPAD_MAP[digit2][1],0},(head_button_t){MIC_48_SW1_LOC,KEYPAD_MAP[digit2][0],0});
+	ButtonControlPress2((head_button_t){MIC_48_SW2_LOC,KEYPAD_MAP[digit3][1],0},(head_button_t){MIC_48_SW1_LOC,KEYPAD_MAP[digit3][0],0});
+	ButtonControlPress2((head_button_t){MIC_48_SW2_LOC,KEYPAD_MAP[digit4][1],0},(head_button_t){MIC_48_SW1_LOC,KEYPAD_MAP[digit4][0],0});
+	ButtonControlPress2((head_button_t){MIC_48_SW2_LOC,KEYPAD_MAP[digit5][1],0},(head_button_t){MIC_48_SW1_LOC,KEYPAD_MAP[digit5][0],0});
+	ButtonControlPress2((head_button_t){MIC_48_SW2_LOC,KEYPAD_MAP[digit6][1],0},(head_button_t){MIC_48_SW1_LOC,KEYPAD_MAP[digit6][0],0});
+	
 }
 
 /*!
@@ -144,6 +164,6 @@ int AutotuneProcessFrequency(char* frequency,int* Mhz,int* Khz)
 		frequency++;		//advance to next character
 	}
 	
-	//todo might want abetter error here
+	//todo might want a better error here
 	return(ERR_AUTOTUNE_FREQUENCY_INVALID);		//frequency extraction completed
 }
